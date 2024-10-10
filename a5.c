@@ -10,8 +10,8 @@ typedef struct tnode {
     Point point;
     int height;
     struct tnode *left, *right;
-    int *y_list;          // Array to store y-coordinates
-    int y_count;          // Count of y-coordinates stored
+    int *y_list;        
+    int y_count;         
 } tnode;
 
 int max(int a, int b) {
@@ -79,7 +79,7 @@ tnode* createNode(Point point) {
     new_node->point = point;
     new_node->left = new_node->right = NULL;
     new_node->height = 1;
-    new_node->y_list = (int*)malloc(sizeof(int) * 10); // Initial size, can be resized
+    new_node->y_list = (int*)malloc(sizeof(int) * 10); 
     new_node->y_count = 0;
     return new_node;
 }
@@ -93,8 +93,7 @@ tnode* insert(tnode* node, Point point) {
     } else if (point.x > node->point.x || (point.x == node->point.x && point.y > node->point.y)) {
         node->right = insert(node->right, point);
     } else {
-        // If the x-coordinate is the same, add the y-coordinate to the list
-        if (node->y_count % 10 == 0) { // Resize if needed
+        if (node->y_count % 10 == 0) {
             node->y_list = (int*)realloc(node->y_list, sizeof(int) * (node->y_count + 10));
         }
         node->y_list[node->y_count++] = point.y;
@@ -111,7 +110,6 @@ void range_search(tnode* node, int x_min, int x_max, int* y_values, int* count) 
         }
     }
 
-    // Search left and right subtrees
     if (node->point.x > x_min) {
         range_search(node->left, x_min, x_max, y_values, count);
     }
@@ -136,7 +134,7 @@ void freeTree(tnode* root) {
     if (!root) return;
     freeTree(root->left);
     freeTree(root->right);
-    free(root->y_list); // Free the y-coordinate list
+    free(root->y_list); 
     free(root);
 }
 
@@ -159,7 +157,6 @@ int main(int argc, char *argv[]) {
     }
     fclose(file);
 
-    // Example of range search
     int cx, cy, radius;
     while (scanf("%d %d %d", &cx, &cy, &radius) == 3) {
         printf("%d\n", countPointsInCircle(root, cx, cy, radius));
