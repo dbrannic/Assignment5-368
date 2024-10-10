@@ -10,8 +10,9 @@ typedef struct tnode {
     Point point;
     int height;
     struct tnode *left, *right;
+    int *y_list;          // Array to store y-coordinates
+    int y_count;          // Count of y-coordinates stored
 } tnode;
-
 
 int max(int a, int b) {
     return (a > b) ? a : b;
@@ -59,34 +60,64 @@ tnode* balance(tnode* node) {
 
     if (balance_factor > 1) {
         if (height(node->left->left) >= height(node->left->right)) {
-            return rotate_r(node);
+            node = rotate_r(node);
         } else {
-            return rotate_l_r(node);
+            node = rotate_l_r(node);
         }
     } else if (balance_factor < -1) {
         if (height(node->right->right) >= height(node->right->left)) {
-            return rotate_l(node);
+            node = rotate_l(node);
         } else {
-            return rotate_r_l(node);
+            node = rotate_r_l(node);
         }
     }
     return node;
 }
 
+tnode* createNode(Point point) {
+    tnode* new_node = (tnode*)malloc(sizeof(tnode));
+    new_node->point = point;
+    new_node->left = new_node->right = NULL;
+    new_node->height = 1;
+    new_node->y_list = (int*)malloc(sizeof(int) * 10); // Initial size, can be resized
+    new_node->y_count = 0;
+    return new_node;
+}
+
 tnode* insert(tnode* node, Point point) {
     if (!node) {
-        tnode* new_node = (tnode*)malloc(sizeof(tnode));
-        new_node->point = point;
-        new_node->left = new_node->right = NULL;
-        new_node->height = 1;
-        return new_node;
+        return createNode(point);
     }
     if (point.x < node->point.x || (point.x == node->point.x && point.y < node->point.y)) {
         node->left = insert(node->left, point);
     } else if (point.x > node->point.x || (point.x == node->point.x && point.y > node->point.y)) {
         node->right = insert(node->right, point);
+    } else {
+        // If the x-coordinate is the same, add the y-coordinate to the list
+        if (node->y_count % 10 == 0) { // Resize if needed
+            node->y_list = (int*)realloc(node->y_list, sizeof(int) * (node->y_count + 10));
+        }
+        node->y_list[node->y_count++] = point.y;
     }
     return balance(node);
+}
+
+void range_search(tnode* node, int x_min, int x_max, int* y_values, int* count) {
+    if (!node) return;
+
+    if (node->point.x >= x_min && node->point.x <= x_max) {
+        for (int i = 0; i < node->y_count; i++) {
+            y_values[(*count)++] = node->y_list[i];
+        }
+    }
+
+    // Search left and right subtrees
+    if (node->point.x > x_min) {
+        range_search(node->left, x_min, x_max, y_values, count);
+    }
+    if (node->point.x < x_max) {
+        range_search(node->right, x_min, x_max, y_values, count);
+    }
 }
 
 int isPointInCircle(Point p, int cx, int cy, int radius) {
@@ -95,25 +126,9 @@ int isPointInCircle(Point p, int cx, int cy, int radius) {
 
 int countPointsInCircle(tnode* root, int cx, int cy, int radius) {
     if (!root) return 0;
-
-    int count = 0;
-    tnode *stack[100];
-    int stack_index = 0;
-
-    stack[stack_index++] = root;
-
-    while (stack_index > 0) {
-        tnode* current = stack[--stack_index];
-        if (!current) continue;
-
-        if (isPointInCircle(current->point, cx, cy, radius)) {
-            count++;
-        }
-
-        stack[stack_index++] = current->left;
-        stack[stack_index++] = current->right;
-    }
-
+    int count = isPointInCircle(root->point, cx, cy, radius);
+    count += countPointsInCircle(root->left, cx, cy, radius);
+    count += countPointsInCircle(root->right, cx, cy, radius);
     return count;
 }
 
@@ -121,6 +136,7 @@ void freeTree(tnode* root) {
     if (!root) return;
     freeTree(root->left);
     freeTree(root->right);
+    free(root->y_list); // Free the y-coordinate list
     free(root);
 }
 
@@ -143,6 +159,7 @@ int main(int argc, char *argv[]) {
     }
     fclose(file);
 
+    // Example of range search
     int cx, cy, radius;
     while (scanf("%d %d %d", &cx, &cy, &radius) == 3) {
         printf("%d\n", countPointsInCircle(root, cx, cy, radius));
@@ -151,3 +168,4 @@ int main(int argc, char *argv[]) {
     freeTree(root);
     return 0;
 }
+
