@@ -12,6 +12,7 @@ typedef struct tnode {
     struct tnode *left, *right;
 } tnode;
 
+
 int max(int a, int b) {
     return (a > b) ? a : b;
 }
@@ -58,15 +59,15 @@ tnode* balance(tnode* node) {
 
     if (balance_factor > 1) {
         if (height(node->left->left) >= height(node->left->right)) {
-            node = rotate_r(node); 
+            return rotate_r(node);
         } else {
-            node = rotate_l_r(node); 
+            return rotate_l_r(node);
         }
     } else if (balance_factor < -1) {
         if (height(node->right->right) >= height(node->right->left)) {
-            node = rotate_l(node); 
+            return rotate_l(node);
         } else {
-            node = rotate_r_l(node); 
+            return rotate_r_l(node);
         }
     }
     return node;
@@ -94,9 +95,25 @@ int isPointInCircle(Point p, int cx, int cy, int radius) {
 
 int countPointsInCircle(tnode* root, int cx, int cy, int radius) {
     if (!root) return 0;
-    int count = isPointInCircle(root->point, cx, cy, radius);
-    count += countPointsInCircle(root->left, cx, cy, radius);
-    count += countPointsInCircle(root->right, cx, cy, radius);
+
+    int count = 0;
+    tnode *stack[100];
+    int stack_index = 0;
+
+    stack[stack_index++] = root;
+
+    while (stack_index > 0) {
+        tnode* current = stack[--stack_index];
+        if (!current) continue;
+
+        if (isPointInCircle(current->point, cx, cy, radius)) {
+            count++;
+        }
+
+        stack[stack_index++] = current->left;
+        stack[stack_index++] = current->right;
+    }
+
     return count;
 }
 
