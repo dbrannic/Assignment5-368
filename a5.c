@@ -81,11 +81,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    Point points[1000000];
+    Point points[10000000];
     int count = 0;
     while (fscanf(file, "%d %d", &points[count].x, &points[count].y) == 2) {
         count++;
-        if (count >= 1000000) {
+        if (count >= 10000000) {
             perror("Error: Too many points\n");
             return 1;
         }
