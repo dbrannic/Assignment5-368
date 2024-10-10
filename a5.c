@@ -86,10 +86,6 @@ int main(int argc, char *argv[]) {
     int count = 0;
     while (fscanf(file, "%d %d", &points[count].x, &points[count].y) == 2) {
         count++;
-        if (count >= MAX) {
-            perror("Error: Too many points\n");
-            return 1;
-        }
     }
     fclose(file);
     kdnode *root = build_tree(points, count, 0);
