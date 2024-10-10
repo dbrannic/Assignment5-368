@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#define MAX 1000000
 
 typedef struct Point {
     int x, y;
@@ -81,11 +82,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    Point points[10000000];
+    Point points[MAX];
     int count = 0;
     while (fscanf(file, "%d %d", &points[count].x, &points[count].y) == 2) {
         count++;
-        if (count >= 10000000) {
+        if (count >= MAX) {
             perror("Error: Too many points\n");
             return 1;
         }
